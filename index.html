@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diario della tavola</title>
+<style>
+:root{--bg:#f4f1ee;--card:#fbfaf8;--ink:#1c1917;--mute:#78716c;--acc:#a8342a;--accsoft:#ecd5d1;--line:#e3ddd7;--chip:#fbfaf8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1816;--card:#262220;--ink:#f3eee9;--mute:#a39a92;--acc:#d2574b;--accsoft:#4a2a26;--line:#383330;--chip:#262220}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+.wrap{max-width:560px;margin:0 auto;padding:20px 18px 110px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+h1{font-family:"Playfair Display",Georgia,serif;font-size:34px;line-height:1.05;margin:0;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--mute);font-size:14px;margin-top:6px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px}
+.seg button{border:0;background:none;color:var(--mute);font:600 15px inherit;font-family:inherit;padding:9px 16px;border-radius:99px;cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}
+.search{width:100%;margin:20px 0 14px;padding:15px 18px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:16px inherit;font-family:inherit}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);font:600 15px inherit;font-family:inherit;padding:9px 16px;border-radius:99px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+h2{font-family:"Playfair Display",Georgia,serif;font-size:19px;margin:26px 0 10px;color:var(--mute);font-weight:700}
+.meal{display:flex;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;width:100%;text-align:left;color:var(--ink);font-family:inherit}
+.date{text-align:center;min-width:44px;padding-right:16px;border-right:1px solid var(--line)}
+.date b{display:block;font-family:"Playfair Display",Georgia,serif;font-size:30px;line-height:1}
+.date span{font-size:13px;color:var(--mute);text-transform:capitalize}
+.row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{background:var(--accsoft);color:var(--acc);font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px}
+.title{font-weight:600;font-size:18px}
+.meta{color:var(--mute);font-size:15px;margin-top:5px}
+.empty{color:var(--mute);text-align:center;padding:40px 0}
+.fab{position:fixed;right:20px;bottom:calc(22px + env(safe-area-inset-bottom,0px));background:var(--acc);color:#fff;border:0;border-radius:99px;padding:15px 22px;font:600 16px inherit;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+dialog{border:0;border-radius:20px;background:var(--bg);color:var(--ink);width:min(92vw,480px);padding:22px;font-family:inherit}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+label{display:block;font-size:13px;color:var(--mute);margin:14px 0 5px}
+input,select,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:16px inherit;font-family:inherit}
+.btns{display:flex;gap:10px;margin-top:20px}
+.btns button{flex:1;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 16px inherit;font-family:inherit;cursor:pointer}
+.btns .go{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btns .del{color:var(--acc)}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}
+.stat h3{margin:0 0 12px;font-size:15px;color:var(--mute);font-weight:600}
+.big{font-family:"Playfair Display",Georgia,serif;font-size:42px;font-weight:800}
+.bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:15px}
+.bar i{display:block;height:10px;background:var(--acc);border-radius:99px;min-width:6px}
+.bar span:first-child{width:92px;flex:none}
+.thumb{position:relative;width:60px;height:60px;border-radius:12px;object-fit:cover;margin-left:auto;flex:none}
+.thumbw{position:relative;margin-left:auto;flex:none}
+.thumbw em{position:absolute;right:-6px;top:-6px;background:var(--acc);color:#fff;font:600 12px inherit;font-style:normal;border-radius:99px;padding:2px 7px}
+.prev{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.prev div{position:relative}
+.prev img{width:76px;height:76px;object-fit:cover;border-radius:12px;display:block}
+.prev button{position:absolute;right:-6px;top:-6px;width:24px;height:24px;border-radius:99px;border:0;background:var(--ink);color:var(--bg);font-size:14px;cursor:pointer;line-height:1}
+dialog{overflow:auto;max-height:92vh}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>Diario della tavola</h1><div class="sub" id="count"></div></div>
+    <div class="seg" role="tablist"><button class="on" id="tabD">Diario</button><button id="tabN">Numeri</button></div>
+  </header>
+  <div id="viewD">
+    <input class="search" id="q" type="search" placeholder="Cerca persone, piatti, luoghi...">
+    <div class="chips" id="chips"></div>
+    <div id="list"></div>
+  </div>
+  <div id="viewN" hidden style="margin-top:22px"></div>
+</div>
+<button class="fab" id="add">+ Nuovo pasto</button>
+
+<dialog id="dlg">
+  <h1 style="font-size:26px" id="dTitle">Nuovo pasto</h1>
+  <label>Data</label><input type="date" id="fDate">
+  <label>Tipo</label><select id="fType"></select>
+  <label>Persone (separate da virgola)</label><input id="fPeople" placeholder="Claudio, Cristina">
+  <label>Piatti</label><input id="fDishes" placeholder="Pasta al pomodoro, tiramisù">
+  <label>Luogo</label><input id="fPlace" placeholder="Casa, ristorante...">
+  <label>Foto dei piatti</label><input type="file" id="fFile" accept="image/*" multiple><div class="prev" id="fPrev"></div>
+  <label>Note</label><textarea id="fNotes" rows="2"></textarea>
+  <div class="btns"><button id="cancel">Annulla</button><button class="del" id="del" hidden>Elimina</button><button class="go" id="save">Salva</button></div>
+</dialog>
+
+<script>
+const TYPES=["Colazione","Pranzo","Aperitivo","Cena"];
+const MESI=["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+const GIORNI=["dom","lun","mar","mer","gio","ven","sab"];
+const KEY="diario-tavola";
+let meals=[],filter="Tutti",editId=null;
+try{meals=JSON.parse(localStorage.getItem(KEY)||"null")||[]}catch(e){meals=[]}
+if(!meals.length)meals=[{id:1,date:"2026-11-20",type:"Pranzo",people:["Claudio","Cristina"],dishes:"",place:"",notes:""}];
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(meals))}catch(e){alert("Spazio pieno: elimina qualche foto e riprova.")}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const split=s=>s.split(",").map(x=>x.trim()).filter(Boolean);
+$("fType").innerHTML=TYPES.map(t=>`<option>${t}</option>`).join("");
+let photos=[];
+function renderPrev(){
+  $("fPrev").innerHTML=photos.map((p,i)=>`<div><img src="${p}" alt="Foto ${i+1}"><button type="button" data-i="${i}" aria-label="Rimuovi foto">×</button></div>`).join("");
+  $("fPrev").querySelectorAll("button").forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.i,1);renderPrev()});
+}
+function shrink(file){return new Promise(res=>{
+  const r=new FileReader();
+  r.onload=()=>{const im=new Image();im.onload=()=>{
+    const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");
+    c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+    c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+    res(c.toDataURL("image/jpeg",.72));
+  };im.onerror=()=>res(null);im.src=r.result};
+  r.onerror=()=>res(null);r.readAsDataURL(file);
+})}
+$("fFile").onchange=async e=>{
+  for(const f of e.target.files){const d=await shrink(f);if(d&&photos.length<6)photos.push(d)}
+  e.target.value="";renderPrev();
+};
+
+function renderChips(){
+  $("chips").innerHTML=["Tutti",...TYPES].map(t=>`<button class="chip ${t===filter?"on":""}" data-t="${t}">${t}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=b.dataset.t;renderChips();renderList()});
+}
+function renderList(){
+  const q=$("q").value.toLowerCase();
+  const items=meals.filter(m=>(filter==="Tutti"||m.type===filter)&&(!q||[m.people.join(" "),m.dishes,m.place,m.notes,m.type].join(" ").toLowerCase().includes(q)))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+  $("count").textContent=meals.length===1?"1 pasto registrato":meals.length+" pasti registrati";
+  if(!items.length){$("list").innerHTML='<div class="empty">Nessun pasto trovato. Tocca “Nuovo pasto” per aggiungerne uno.</div>';return}
+  let out="",cur="";
+  items.forEach(m=>{
+    const d=new Date(m.date+"T12:00:00"),h=MESI[d.getMonth()]+" "+d.getFullYear();
+    if(h!==cur){out+=`<h2>${h}</h2>`;cur=h}
+    const meta=[m.people.length?"👥 "+m.people.join(", "):"",m.place?"📍 "+m.place:"",m.dishes?"🍽 "+m.dishes:""].filter(Boolean).map(esc).join("<br>");
+    out+=`<button class="meal" data-id="${m.id}"><div class="date"><b>${d.getDate()}</b><span>${GIORNI[d.getDay()]}</span></div><div><div class="row1"><span class="tag">${m.type}</span><span class="title">${m.type}</span></div><div class="meta">${meta||"Nessun dettaglio"}</div></div>${m.photos&&m.photos.length?`<div class="thumbw"><img class="thumb" src="${m.photos[0]}" alt="" style="margin:0">${m.photos.length>1?`<em>+${m.photos.length-1}</em>`:""}</div>`:""}</button>`;
+  });
+  $("list").innerHTML=out;
+  $("list").querySelectorAll(".meal").forEach(b=>b.onclick=()=>openDlg(+b.dataset.id));
+}
+function renderNumbers(){
+  const cnt=(arr)=>{const o={};arr.forEach(x=>o[x]=(o[x]||0)+1);return Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,5)};
+  const bars=(e)=>{const mx=e.length?e[0][1]:1;return e.map(([k,v])=>`<div class="bar"><span>${esc(k)}</span><i style="width:${v/mx*55}%"></i><span>${v}</span></div>`).join("")||'<div class="meta">Ancora nessun dato.</div>'};
+  $("viewN").innerHTML=`<div class="stat"><h3>Pasti registrati</h3><div class="big">${meals.length}</div></div>
+  <div class="stat"><h3>Per tipo</h3>${bars(cnt(meals.map(m=>m.type)))}</div>
+  <div class="stat"><h3>Con chi mangi di più</h3>${bars(cnt(meals.flatMap(m=>m.people)))}</div>
+  <div class="stat"><h3>Luoghi preferiti</h3>${bars(cnt(meals.map(m=>m.place).filter(Boolean)))}</div>`;
+}
+function openDlg(id){
+  editId=id;const m=meals.find(x=>x.id===id);
+  $("dTitle").textContent=m?"Modifica pasto":"Nuovo pasto";
+  $("fDate").value=m?m.date:new Date().toISOString().slice(0,10);
+  $("fType").value=m?m.type:"Pranzo";
+  $("fPeople").value=m?m.people.join(", "):"";
+  $("fDishes").value=m?m.dishes:"";$("fPlace").value=m?m.place:"";$("fNotes").value=m?m.notes:"";
+  photos=m&&m.photos?[...m.photos]:[];renderPrev();
+  $("del").hidden=!m;$("dlg").showModal();
+}
+$("add").onclick=()=>openDlg(null);
+$("cancel").onclick=()=>$("dlg").close();
+$("save").onclick=()=>{
+  if(!$("fDate").value)return;
+  const m={id:editId||Date.now(),date:$("fDate").value,type:$("fType").value,people:split($("fPeople").value),dishes:$("fDishes").value.trim(),place:$("fPlace").value.trim(),notes:$("fNotes").value.trim(),photos:[...photos]};
+  meals=editId?meals.map(x=>x.id===editId?m:x):[...meals,m];
+  save();$("dlg").close();renderList();renderNumbers();
+};
+$("del").onclick=()=>{meals=meals.filter(x=>x.id!==editId);save();$("dlg").close();renderList();renderNumbers()};
+$("q").oninput=renderList;
+$("tabD").onclick=()=>{$("tabD").classList.add("on");$("tabN").classList.remove("on");$("viewD").hidden=false;$("viewN").hidden=true;$("add").hidden=false};
+$("tabN").onclick=()=>{$("tabN").classList.add("on");$("tabD").classList.remove("on");$("viewD").hidden=true;$("viewN").hidden=false;$("add").hidden=true;renderNumbers()};
+renderChips();renderList();
+</script>
+</body>
+</html>
